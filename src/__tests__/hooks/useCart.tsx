@@ -1,7 +1,7 @@
 import { ReactNode, useContext, useEffect, useState } from "react";
 import { createContext } from "react";
 import { toast } from "react-toastify";
-import { api } from "../services/api";
+import { api } from "../../services/api";
 
 interface Product {
   id: number;
@@ -37,11 +37,11 @@ export function CartProvider({ children }: CartProviderProps) {
     try {
       const product = cart.find((prod) => productId === prod.id);
       if (product) {
-        updateProductAmount(productId, product.amount + 1);
+        updateProductAmount(productId, product.amount);
       } else {
         const { data: stock } = await api.get(`/stock/${productId}`);
 
-        if (stock.amount > 0) {
+        if (stock > 0) {
           const { data: newProduct } = await api.get(`/products/${productId}`);
           setCart([...cart, { ...newProduct, amount: 1 }]);
         } else {
@@ -68,7 +68,7 @@ export function CartProvider({ children }: CartProviderProps) {
     try {
       if (amount > 0) {
         const { data: stock } = await api.get(`/stock/${productId}`);
-        if (stock.amount >= amount) {
+        if (stock <= amount) {
           const newCart = cart.map((prod) =>
             prod.id === productId ? { ...prod, amount } : prod
           );
